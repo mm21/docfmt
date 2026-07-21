@@ -196,7 +196,7 @@ def _reflow(lines: list[str], width: int, indent_len: int, force: bool) -> list[
 
     Preserving author line breaks in paragraphs that are already within the wrap
     width keeps docfmt a drop-in: it does not refill prose that nothing is wrong
-    with. `force_wrap` opts into unconditional reflow.
+    with. `force_reflow` opts into unconditional reflow.
     """
     if not force and _fits(lines, width, indent_len):
         return [line.rstrip() for line in lines]
@@ -243,7 +243,7 @@ def _summary_lines(lines: list[str], indent: str, config: Config) -> list[str]:
     """
     width = config.wrap_summaries
 
-    if config.force_wrap or not _fits(lines, width, len(indent)):
+    if config.force_reflow or not _fits(lines, width, len(indent)):
         text = " ".join(line.strip() for line in lines).strip()
         if config.capitalize_summary:
             text = _capitalize(text, config.non_cap)
@@ -297,7 +297,7 @@ def format_literal(
                     block.lines,
                     config.wrap_descriptions,
                     len(indent),
-                    config.force_wrap,
+                    config.force_reflow,
                 )
             )
 

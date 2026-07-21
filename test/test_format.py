@@ -93,8 +93,8 @@ def test_short_paragraph_line_breaks_are_preserved(config):
     assert format_source(source, config) == source
 
 
-def test_force_wrap_refills_prose(config):
-    config = replace(config, force_wrap=True)
+def test_force_reflow_refills_prose(config):
+    config = replace(config, force_reflow=True)
     source = '''def f():
     """
     Summary.

@@ -26,7 +26,7 @@ PROFILES = {
     "pep257": {},
     "aggressive": dict(
         black=True,
-        force_wrap=True,
+        force_reflow=True,
         add_summary_period=True,
         capitalize_summary=True,
         post_description_blank=True,
@@ -101,8 +101,8 @@ def test_wrap_width_extremes_are_idempotent():
         assert format_source(once, config) == once, f"width={width}"
 
 
-def test_force_wrap_is_idempotent():
+def test_force_reflow_is_idempotent():
     source = (Path(__file__).parent / "corpus" / "myst_.py").read_text()
-    config = replace(Config(black=True).resolve(), force_wrap=True)
+    config = replace(Config(black=True).resolve(), force_reflow=True)
     once = format_source(source, config)
     assert format_source(once, config) == once

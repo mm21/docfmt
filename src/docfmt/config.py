@@ -101,9 +101,9 @@ class Config:
     Don't strictly follow reST syntax when identifying lists.
     """
 
-    force_wrap: bool = False
+    force_reflow: bool = False
     """
-    Wrap descriptions even when the result may be poor.
+    Reflow descriptions even when they already fit within the wrap width.
     """
 
     tab_width: int = 1

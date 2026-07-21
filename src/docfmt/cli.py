@@ -69,7 +69,7 @@ def _build_parser() -> argparse.ArgumentParser:
         "--blank", dest="post_description_blank", action="store_true", default=None
     )
     parser.add_argument("--non-strict", action="store_true", default=None)
-    parser.add_argument("--force-wrap", action="store_true", default=None)
+    parser.add_argument("--force-reflow", action="store_true", default=None)
     parser.add_argument("--add-summary-period", action="store_true", default=None)
     parser.add_argument("--capitalize-summary", action="store_true", default=None)
     parser.add_argument("--tab-width", type=int, metavar="width")
@@ -94,7 +94,7 @@ _OVERRIDABLE = (
     "close_quotes_on_newline",
     "post_description_blank",
     "non_strict",
-    "force_wrap",
+    "force_reflow",
     "add_summary_period",
     "capitalize_summary",
     "tab_width",
