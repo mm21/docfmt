@@ -1,8 +1,22 @@
 # docfmt
 
-Reliable docstring formatter for Python.
+Reliable docstring formatter for Python
 
-## Why
+[![Python versions](https://img.shields.io/pypi/pyversions/docfmt.svg)](https://pypi.org/project/docfmt)
+[![PyPI](https://img.shields.io/pypi/v/docfmt?color=%2334D058&label=pypi%20package)](https://pypi.org/project/docfmt)
+[![Tests](./badges/tests.svg?dummy=8484744)]()
+[![Coverage](./badges/cov.svg?dummy=8484744)]()
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
+- [docfmt](#docfmt)
+  - [Motivation](#motivation)
+  - [Behavior](#behavior)
+    - [MyST directives](#myst-directives)
+    - [Attribute docstrings](#attribute-docstrings)
+  - [Usage](#usage)
+  - [Exit codes](#exit-codes)
+
+## Motivation
 
 Docstring formatters that rebuild the file from a token stream are prone to a
 particular class of bug: edits computed against one version of the token list get
@@ -118,7 +132,3 @@ after-attribute = 1
 | 0 | Nothing to do, or changes written in in-place mode |
 | 1 | Check mode: files would change |
 | 2 | Error; no file was modified |
-
-## License
-
-MIT
