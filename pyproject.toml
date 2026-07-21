@@ -61,12 +61,9 @@ exclude_lines = [
 data_file = "__cache__/.coverage"
 
 [tool.docfmt]  # managed by pyprojkit
-black = true
 in-place = true
-make-summary-multi-line = true
-non-strict = true
-pre-summary-newline = true
 recursive = true
+summary-on-own-line = true
 
 [tool.doit]  # managed by pyprojkit
 dep_file = "__cache__/.doit.db"

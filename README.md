@@ -24,12 +24,12 @@ docfmt is built so that cannot happen:
 
 ## Behavior
 
-docfmt normalizes docstring *layout* and, by default, never mutates author text.
-Adding a trailing period and capitalizing the first word are opt-in
-(`--add-summary-period`, `--capitalize-summary`).
+docfmt normalizes docstring *layout* and never mutates author text. Adding a
+trailing period is the one exception, and it is opt-in
+(`--add-summary-period`).
 
 Blank lines around docstrings are **preserved** by default. Normalization is
-opt-in per position, e.g. `blank-line-after-attribute-docstring`.
+opt-in per position under `[tool.docfmt.blank-lines]`.
 
 Structured content is copied verbatim and never rewrapped: fenced code blocks,
 MyST directives, doctests, reST directives and field lists, tables, and lists.
@@ -82,16 +82,34 @@ Configure via `[tool.docfmt]` in `pyproject.toml`:
 
 ```toml
 [tool.docfmt]
-black = true
 in-place = true
-make-summary-multi-line = true
-non-strict = true
-pre-summary-newline = true
 recursive = true
+summary-on-own-line = true
 ```
 
-In `black` mode, wrap lengths come from `[tool.black] line-length` when set,
-falling back to 88.
+| Key | Default | Meaning |
+| --- | --- | --- |
+| `line-length` | black's, else 88 | wrap width; 0 disables wrapping |
+| `summary-on-own-line` | `false` | put the summary below the opening quotes |
+| `blank-after-description` | `false` | blank line before the closing quotes |
+| `force-reflow` | `false` | refill prose that already fits |
+| `add-summary-period` | `false` | append a period to summaries |
+| `exclude` | `[]` | path fragments to skip when recursing |
+
+`line-length` is left unset by default and picked up from
+`[tool.black] line-length` when black is configured, falling back to 88.
+
+Blank-line rules live in their own table. Each is a count, or `"preserve"` to
+leave the author's spacing alone:
+
+```toml
+[tool.docfmt.blank-lines]
+before-class = "preserve"
+after-module = 1
+after-class = 1
+after-function = "preserve"
+after-attribute = 1
+```
 
 ## Exit codes
 

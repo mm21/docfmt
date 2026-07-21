@@ -3,12 +3,11 @@ Property tests over the corpus: formatting must be idempotent, must never change
 the AST beyond docstring contents, and must be independent of file position.
 """
 
-from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
-from docfmt import Config, assert_ast_equivalent, format_source
+from docfmt import BlankLineRules, Config, assert_ast_equivalent, format_source
 
 CORPUS = sorted((Path(__file__).parent / "corpus").glob("*.py"))
 SOURCES = sorted(Path(__file__).parent.parent.joinpath("src").rglob("*.py"))
@@ -17,27 +16,20 @@ TESTS = sorted(Path(__file__).parent.glob("test_*.py"))
 ALL_FILES = CORPUS + SOURCES + TESTS
 
 PROFILES = {
-    "known-good": dict(
-        black=True,
-        make_summary_multi_line=True,
-        non_strict=True,
-        pre_summary_newline=True,
-    ),
-    "pep257": {},
+    "known-good": dict(summary_on_own_line=True),
+    "defaults": {},
     "aggressive": dict(
-        black=True,
         force_reflow=True,
         add_summary_period=True,
-        capitalize_summary=True,
-        post_description_blank=True,
+        blank_after_description=True,
     ),
     "normalizing": dict(
-        black=True,
-        pre_summary_newline=True,
-        make_summary_multi_line=True,
-        blank_line_after_attribute_docstring=1,
-        blank_line_after_class_docstring=1,
-        blank_line_after_module_docstring=1,
+        summary_on_own_line=True,
+        blank_lines=BlankLineRules(
+            after_attribute=1,
+            after_class=1,
+            after_module=1,
+        ),
     ),
 }
 
@@ -48,7 +40,7 @@ def ids(paths):
 
 @pytest.fixture(params=sorted(PROFILES), ids=sorted(PROFILES))
 def profile(request) -> Config:
-    return Config(**PROFILES[request.param]).resolve()
+    return Config(**PROFILES[request.param])
 
 
 @pytest.mark.parametrize("path", ALL_FILES, ids=ids(ALL_FILES))
@@ -96,13 +88,13 @@ def test_position_independence_over_corpus(path: Path, config: Config):
 def test_wrap_width_extremes_are_idempotent():
     source = (Path(__file__).parent / "corpus" / "dataclasses_.py").read_text()
     for width in (0, 20, 40, 88, 200):
-        config = Config(wrap_summaries=width, wrap_descriptions=width)
+        config = Config(line_length=width)
         once = format_source(source, config)
         assert format_source(once, config) == once, f"width={width}"
 
 
 def test_force_reflow_is_idempotent():
     source = (Path(__file__).parent / "corpus" / "myst_.py").read_text()
-    config = replace(Config(black=True).resolve(), force_reflow=True)
+    config = Config(force_reflow=True)
     once = format_source(source, config)
     assert format_source(once, config) == once

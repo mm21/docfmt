@@ -58,26 +58,16 @@ def _build_parser() -> argparse.ArgumentParser:
         "-e", "--exclude", nargs="*", help="path fragments to skip when recursing"
     )
     parser.add_argument("--config", help="path to a configuration file")
-    parser.add_argument("--black", action="store_true", help="use black's line length")
-    parser.add_argument("--wrap-summaries", type=int, metavar="length")
-    parser.add_argument("--wrap-descriptions", type=int, metavar="length")
-    parser.add_argument("--pre-summary-newline", action="store_true", default=None)
-    parser.add_argument("--pre-summary-space", action="store_true", default=None)
-    parser.add_argument("--make-summary-multi-line", action="store_true", default=None)
-    parser.add_argument("--close-quotes-on-newline", action="store_true", default=None)
     parser.add_argument(
-        "--blank", dest="post_description_blank", action="store_true", default=None
+        "--line-length",
+        type=int,
+        metavar="length",
+        help="wrap docstrings at this length; 0 disables wrapping",
     )
-    parser.add_argument("--non-strict", action="store_true", default=None)
+    parser.add_argument("--summary-on-own-line", action="store_true", default=None)
+    parser.add_argument("--blank-after-description", action="store_true", default=None)
     parser.add_argument("--force-reflow", action="store_true", default=None)
     parser.add_argument("--add-summary-period", action="store_true", default=None)
-    parser.add_argument("--capitalize-summary", action="store_true", default=None)
-    parser.add_argument("--tab-width", type=int, metavar="width")
-    parser.add_argument("--non-cap", nargs="*")
-    parser.add_argument("--range", dest="line_range", nargs=2, type=int, metavar="line")
-    parser.add_argument(
-        "--docstring-length", dest="length_range", nargs=2, type=int, metavar="length"
-    )
     parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
     parser.add_argument("files", nargs="+", help="files or directories to format")
 
@@ -85,19 +75,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 _OVERRIDABLE = (
-    "black",
-    "wrap_summaries",
-    "wrap_descriptions",
-    "pre_summary_newline",
-    "pre_summary_space",
-    "make_summary_multi_line",
-    "close_quotes_on_newline",
-    "post_description_blank",
-    "non_strict",
+    "line_length",
+    "summary_on_own_line",
+    "blank_after_description",
     "force_reflow",
     "add_summary_period",
-    "capitalize_summary",
-    "tab_width",
 )
 
 
@@ -107,29 +89,24 @@ def _load_config(args: argparse.Namespace) -> Config:
     """
     path = Path(args.config) if args.config else find_config_file(Path.cwd())
 
-    black_line_length: int | None = None
     config = Config()
 
     if path is not None:
         table, black_line_length = load_table(path)
-        config = config_from_table(table)
+        config = config_from_table(table, black_line_length=black_line_length)
 
     updates = {
-        name: getattr(args, name) for name in _OVERRIDABLE if getattr(args, name, None)
+        name: getattr(args, name)
+        for name in _OVERRIDABLE
+        if getattr(args, name, None) is not None
     }
-    if args.non_cap:
-        updates["non_cap"] = tuple(args.non_cap)
     if args.exclude:
         updates["exclude"] = tuple(args.exclude)
-    if args.line_range:
-        updates["line_range"] = tuple(args.line_range)
-    if args.length_range:
-        updates["length_range"] = tuple(args.length_range)
 
     if updates:
         config = replace(config, **updates)
 
-    return config.resolve(black_line_length=black_line_length)
+    return config
 
 
 def _collect(paths: list[str], recursive: bool, exclude: tuple[str, ...]) -> list[Path]:
@@ -166,10 +143,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: {exc}", file=sys.stderr)
         return _EXIT_ERROR
 
-    for name in ("line_range", "length_range"):
-        value = getattr(config, name)
-        if value is not None and (value[0] < 1 or value[0] > value[1]):
-            parser.error(f"invalid {name}: {value}")
+    if config.line_length < 0:
+        parser.error(f"invalid line-length: {config.line_length}")
 
     paths = _collect(args.files, args.recursive, config.exclude)
 

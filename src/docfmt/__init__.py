@@ -31,8 +31,10 @@ from .splice import (
     LineIndex,
 )
 from .config import (
+    DEFAULT_LINE_LENGTH,
     PRESERVE,
     BlankLines,
+    BlankLineRules,
     Config,
     find_config_file,
     load_table,
@@ -69,10 +71,12 @@ from .cli import (
 )
 
 __all__ = [
+    "BlankLineRules",
     "BlankLines",
     "Block",
     "BlockKind",
     "Config",
+    "DEFAULT_LINE_LENGTH",
     "DocfmtError",
     "DocstringKind",
     "DocstringSite",

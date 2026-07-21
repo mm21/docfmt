@@ -217,17 +217,6 @@ def _normalize_quote(literal: StringLiteral) -> str:
     return '"""'
 
 
-def _capitalize(text: str, non_cap: tuple[str, ...]) -> str:
-    """
-    Capitalize the first word unless it is exempt.
-    """
-    words = text.split(" ", 1)
-    if not words or not words[0] or words[0] in non_cap:
-        return text
-    words[0] = words[0][:1].upper() + words[0][1:]
-    return " ".join(words)
-
-
 def _add_period(text: str) -> str:
     """
     Append a period unless the text already ends in terminal punctuation.
@@ -241,19 +230,15 @@ def _summary_lines(lines: list[str], indent: str, config: Config) -> list[str]:
     """
     Build the summary lines, preserving author line breaks when they already fit.
     """
-    width = config.wrap_summaries
+    width = config.line_length
 
     if config.force_reflow or not _fits(lines, width, len(indent)):
         text = " ".join(line.strip() for line in lines).strip()
-        if config.capitalize_summary:
-            text = _capitalize(text, config.non_cap)
         if config.add_summary_period:
             text = _add_period(text)
         return wrap_paragraph(text, width, len(indent))
 
     out = [line.rstrip() for line in lines]
-    if out and config.capitalize_summary:
-        out[0] = _capitalize(out[0], config.non_cap)
     if out and config.add_summary_period:
         out[-1] = _add_period(out[-1])
     return out
@@ -295,7 +280,7 @@ def format_literal(
             body_lines.extend(
                 _reflow(
                     block.lines,
-                    config.wrap_descriptions,
+                    config.line_length,
                     len(indent),
                     config.force_reflow,
                 )
@@ -305,30 +290,24 @@ def format_literal(
         body_lines.pop()
 
     single_line = (
-        not body_lines
-        and len(summary_lines) == 1
-        and not config.make_summary_multi_line
-        and not config.pre_summary_newline
+        not body_lines and len(summary_lines) == 1 and not config.summary_on_own_line
     )
 
     if single_line:
-        space = " " if config.pre_summary_space else ""
-        return f"{literal.prefix}{quote}{space}{summary_lines[0]}{quote}"
+        return f"{literal.prefix}{quote}{summary_lines[0]}{quote}"
 
     out: list[str] = []
-    summary_own_line = config.pre_summary_newline or config.make_summary_multi_line
 
-    if summary_own_line or not summary_lines:
+    if config.summary_on_own_line or not summary_lines:
         out.append(f"{literal.prefix}{quote}")
         out.extend(indent + line for line in summary_lines)
     else:
-        space = " " if config.pre_summary_space else ""
-        out.append(f"{literal.prefix}{quote}{space}{summary_lines[0]}")
+        out.append(f"{literal.prefix}{quote}{summary_lines[0]}")
         out.extend(indent + line for line in summary_lines[1:])
 
     out.extend(indent + line if line else "" for line in body_lines)
 
-    if config.post_description_blank and body_lines:
+    if config.blank_after_description and body_lines:
         out.append("")
 
     out.append(indent + quote)

@@ -22,26 +22,11 @@ __all__ = [
 ]
 
 _AFTER_RULES = {
-    DocstringKind.MODULE: "blank_line_after_module_docstring",
-    DocstringKind.CLASS: "blank_line_after_class_docstring",
-    DocstringKind.FUNCTION: "blank_line_after_function_docstring",
-    DocstringKind.ATTRIBUTE: "blank_line_after_attribute_docstring",
+    DocstringKind.MODULE: "after_module",
+    DocstringKind.CLASS: "after_class",
+    DocstringKind.FUNCTION: "after_function",
+    DocstringKind.ATTRIBUTE: "after_attribute",
 }
-
-
-def _in_line_range(site: DocstringSite, config: Config) -> bool:
-    if config.line_range is None:
-        return True
-    low, high = config.line_range
-    return low <= site.stmt_lineno and site.stmt_end_lineno <= high
-
-
-def _in_length_range(site: DocstringSite, config: Config) -> bool:
-    if config.length_range is None:
-        return True
-    low, high = config.length_range
-    length = site.stmt_end_lineno - site.stmt_lineno + 1
-    return low <= length <= high
 
 
 def _blank_run_after(index: LineIndex, lineno: int) -> tuple[int, int]:
@@ -93,7 +78,7 @@ def _blank_line_edits(
     edits: list[Edit] = []
 
     if site.next_lineno is not None:
-        rule: BlankLines = getattr(config, _AFTER_RULES[site.kind])
+        rule: BlankLines = getattr(config.blank_lines, _AFTER_RULES[site.kind])
         start, count = _blank_run_after(index, site.stmt_end_lineno)
         if start + count == site.next_lineno:
             edit = _gap_edit(index, start, count, rule)
@@ -102,7 +87,7 @@ def _blank_line_edits(
 
     if site.is_own and site.kind is DocstringKind.CLASS:
         start, count = _blank_run_before(index, site.stmt_lineno)
-        edit = _gap_edit(index, start, count, config.blank_line_before_class_docstring)
+        edit = _gap_edit(index, start, count, config.blank_lines.before_class)
         if edit is not None:
             edits.append(edit)
 
@@ -126,9 +111,6 @@ def format_source(source: str, config: Config) -> str:
     edits: list[Edit] = []
 
     for site in sites:
-        if not _in_line_range(site, config) or not _in_length_range(site, config):
-            continue
-
         replacement = format_literal(site.literal, site.indent, site.kind, config)
         if replacement != source[site.start : site.end]:
             edits.append(Edit(start=site.start, end=site.end, replacement=replacement))

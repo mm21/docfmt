@@ -37,7 +37,7 @@ class Thing:
     assert format_source(source, config) == source
 
 
-def test_make_summary_multi_line(config):
+def test_summary_on_own_line(config):
     source = '''def f():
     """Summary."""
 '''
@@ -61,8 +61,8 @@ def test_single_quoted_docstring_normalized_to_triple(config):
     assert format_source(source, config) == expected
 
 
-def test_one_line_kept_without_multi_line_flags():
-    config = Config(black=True).resolve()
+def test_one_line_kept_without_summary_on_own_line():
+    config = Config()
     source = '''def f():
     """Summary."""
 '''
@@ -108,7 +108,7 @@ def test_force_reflow_refills_prose(config):
 
 
 def test_no_text_mutation_by_default(config):
-    # no trailing period added, no capitalization
+    # no trailing period added, no case change
     source = '''def f():
     """
     lowercase summary with no period
@@ -125,26 +125,6 @@ def test_add_summary_period_opt_in(config):
     """
 '''
     assert "summary." in format_source(source, config)
-
-
-def test_capitalize_summary_opt_in(config):
-    config = replace(config, capitalize_summary=True)
-    source = '''def f():
-    """
-    summary
-    """
-'''
-    assert "Summary" in format_source(source, config)
-
-
-def test_non_cap_respected(config):
-    config = replace(config, capitalize_summary=True, non_cap=("docfmt",))
-    source = '''def f():
-    """
-    docfmt does things
-    """
-'''
-    assert "docfmt does things" in format_source(source, config)
 
 
 def test_doctest_is_verbatim(config):
@@ -227,17 +207,3 @@ def test_empty_lines_between_attribute_pairs_preserved(config):
     """
 '''
     assert format_source(source, config) == source
-
-
-def test_line_range_limits_formatting(config):
-    config = replace(config, line_range=(1, 3))
-    source = '''def f():
-    """Summary one."""
-
-
-def g():
-    """Summary two."""
-'''
-    result = format_source(source, config)
-    assert '"""Summary two."""' in result
-    assert '"""Summary one."""' not in result

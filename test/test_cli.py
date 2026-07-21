@@ -4,10 +4,7 @@ from docfmt.cli import main
 
 PYPROJECT = """
 [tool.docfmt]
-black = true
-make-summary-multi-line = true
-non-strict = true
-pre-summary-newline = true
+summary-on-own-line = true
 """
 
 UNFORMATTED = '''def f():
@@ -124,7 +121,7 @@ def test_check_lists_file_on_stderr(project, capsys):
 
 
 def test_config_is_read_from_pyproject(project):
-    # make-summary-multi-line comes from the config file, not the command line
+    # summary-on-own-line comes from the config file, not the command line
     path = project / "a.py"
     path.write_text(UNFORMATTED)
 
@@ -134,12 +131,12 @@ def test_config_is_read_from_pyproject(project):
 
 def test_explicit_config_path(project, tmp_path):
     other = tmp_path / "other.toml"
-    other.write_text("[tool.docfmt]\nblack = true\n")
+    other.write_text("[tool.docfmt]\nline-length = 88\n")
 
     path = project / "a.py"
     path.write_text(UNFORMATTED)
 
-    # the explicit config lacks make-summary-multi-line, so the one-liner stays
+    # the explicit config lacks summary-on-own-line, so the one-liner stays
     assert main(["--in-place", "--config", str(other), str(path)]) == 0
     assert path.read_text() == UNFORMATTED
 
