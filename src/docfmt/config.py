@@ -105,10 +105,6 @@ class Config:
     """
 
 
-def _toml_key(name: str) -> str:
-    return name.replace("_", "-")
-
-
 def find_config_file(start: Path) -> Path | None:
     """
     Find the nearest configuration file, walking upwards from `start`.
@@ -168,6 +164,10 @@ def config_from_table(
         values["line_length"] = black_line_length
 
     return Config(**values)
+
+
+def _toml_key(name: str) -> str:
+    return name.replace("_", "-")
 
 
 def _blank_line_rules(table: dict[str, Any]) -> BlankLineRules:

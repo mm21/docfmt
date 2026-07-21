@@ -160,18 +160,6 @@ def parse_string_literal(segment: str) -> StringLiteral | None:
     return None
 
 
-def _is_string_expr(node: ast.stmt) -> ast.Constant | None:
-    """
-    Get the string `Constant` of a bare-string expression statement, if it is one.
-    """
-    if not isinstance(node, ast.Expr):
-        return None
-    value = node.value
-    if not isinstance(value, ast.Constant) or not isinstance(value.value, str):
-        return None
-    return value
-
-
 def iter_docstring_nodes(tree: ast.AST) -> Iterator[ast.Constant]:
     """
     Yield every `Constant` node which docfmt treats as a docstring.
@@ -198,14 +186,6 @@ def iter_docstring_nodes(tree: ast.AST) -> Iterator[ast.Constant]:
                 continue
             if (constant := _is_string_expr(body[index])) is not None:
                 yield constant
-
-
-def _owner_kind(node: ast.AST) -> DocstringKind:
-    if isinstance(node, ast.Module):
-        return DocstringKind.MODULE
-    if isinstance(node, ast.ClassDef):
-        return DocstringKind.CLASS
-    return DocstringKind.FUNCTION
 
 
 def discover(tree: ast.AST, source: str, index: LineIndex) -> list[DocstringSite]:
@@ -275,3 +255,23 @@ def discover(tree: ast.AST, source: str, index: LineIndex) -> list[DocstringSite
 
     sites.sort(key=lambda site: site.start)
     return sites
+
+
+def _is_string_expr(node: ast.stmt) -> ast.Constant | None:
+    """
+    Get the string `Constant` of a bare-string expression statement, if it is one.
+    """
+    if not isinstance(node, ast.Expr):
+        return None
+    value = node.value
+    if not isinstance(value, ast.Constant) or not isinstance(value.value, str):
+        return None
+    return value
+
+
+def _owner_kind(node: ast.AST) -> DocstringKind:
+    if isinstance(node, ast.Module):
+        return DocstringKind.MODULE
+    if isinstance(node, ast.ClassDef):
+        return DocstringKind.CLASS
+    return DocstringKind.FUNCTION

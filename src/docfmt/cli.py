@@ -29,6 +29,79 @@ _EXIT_WOULD_CHANGE = 1
 _EXIT_ERROR = 2
 
 
+def main(argv: list[str] | None = None) -> int:
+    """
+    Run the docfmt command line.
+    """
+    parser = _build_parser()
+    args = parser.parse_args(argv)
+
+    try:
+        config = _load_config(args)
+    except (DocfmtError, OSError, ValueError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return _EXIT_ERROR
+
+    if config.line_length < 0:
+        parser.error(f"invalid line-length: {config.line_length}")
+
+    paths = _collect(args.files, args.recursive, config.exclude)
+
+    changed = False
+    errored = False
+
+    for path in paths:
+        try:
+            source = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            print(f"Error: {path}: {exc}", file=sys.stderr)
+            errored = True
+            continue
+
+        try:
+            result = format_source_checked(source, config)
+        except ParseError as exc:
+            print(f"Error: {path}: {exc}", file=sys.stderr)
+            errored = True
+            continue
+        except InternalError as exc:
+            print(
+                f"Internal error: {path}: {exc} (file left unchanged)",
+                file=sys.stderr,
+            )
+            errored = True
+            continue
+
+        if result == source:
+            continue
+
+        changed = True
+
+        if args.diff or not (args.in_place or args.check):
+            diff = difflib.unified_diff(
+                source.splitlines(keepends=True),
+                result.splitlines(keepends=True),
+                fromfile=str(path),
+                tofile=str(path),
+            )
+            sys.stdout.writelines(diff)
+
+        if args.in_place:
+            try:
+                path.write_text(result, encoding="utf-8")
+            except OSError as exc:
+                print(f"Error: {path}: {exc}", file=sys.stderr)
+                errored = True
+        elif args.check:
+            print(str(path), file=sys.stderr)
+
+    if errored:
+        return _EXIT_ERROR
+    if args.check and changed:
+        return _EXIT_WOULD_CHANGE
+    return _EXIT_OK
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="docfmt", description="Format docstrings in Python source files."
@@ -128,79 +201,6 @@ def _collect(paths: list[str], recursive: bool, exclude: tuple[str, ...]) -> lis
             found.append(path)
 
     return found
-
-
-def main(argv: list[str] | None = None) -> int:
-    """
-    Run the docfmt command line.
-    """
-    parser = _build_parser()
-    args = parser.parse_args(argv)
-
-    try:
-        config = _load_config(args)
-    except (DocfmtError, OSError, ValueError) as exc:
-        print(f"Error: {exc}", file=sys.stderr)
-        return _EXIT_ERROR
-
-    if config.line_length < 0:
-        parser.error(f"invalid line-length: {config.line_length}")
-
-    paths = _collect(args.files, args.recursive, config.exclude)
-
-    changed = False
-    errored = False
-
-    for path in paths:
-        try:
-            source = path.read_text(encoding="utf-8")
-        except OSError as exc:
-            print(f"Error: {path}: {exc}", file=sys.stderr)
-            errored = True
-            continue
-
-        try:
-            result = format_source_checked(source, config)
-        except ParseError as exc:
-            print(f"Error: {path}: {exc}", file=sys.stderr)
-            errored = True
-            continue
-        except InternalError as exc:
-            print(
-                f"Internal error: {path}: {exc} (file left unchanged)",
-                file=sys.stderr,
-            )
-            errored = True
-            continue
-
-        if result == source:
-            continue
-
-        changed = True
-
-        if args.diff or not (args.in_place or args.check):
-            diff = difflib.unified_diff(
-                source.splitlines(keepends=True),
-                result.splitlines(keepends=True),
-                fromfile=str(path),
-                tofile=str(path),
-            )
-            sys.stdout.writelines(diff)
-
-        if args.in_place:
-            try:
-                path.write_text(result, encoding="utf-8")
-            except OSError as exc:
-                print(f"Error: {path}: {exc}", file=sys.stderr)
-                errored = True
-        elif args.check:
-            print(str(path), file=sys.stderr)
-
-    if errored:
-        return _EXIT_ERROR
-    if args.check and changed:
-        return _EXIT_WOULD_CHANGE
-    return _EXIT_OK
 
 
 if __name__ == "__main__":

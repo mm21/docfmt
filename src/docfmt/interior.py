@@ -69,6 +69,119 @@ class Block:
     lines: list[str]
 
 
+def parse_blocks(lines: list[str]) -> list[Block]:
+    """
+    Split docstring content lines into classified blocks.
+
+    A paragraph containing any structured line is verbatim in its entirety,
+    which keeps wrapping conservative.
+    """
+    blocks: list[Block] = []
+    index = 0
+
+    while index < len(lines):
+        if _is_blank(lines[index]):
+            run = index
+            while run < len(lines) and _is_blank(lines[run]):
+                run += 1
+            blocks.append(Block(BlockKind.BLANK, lines[index:run]))
+            index = run
+            continue
+
+        fence_end = _scan_fence(lines, index)
+        if fence_end is not None:
+            blocks.append(Block(BlockKind.VERBATIM, lines[index:fence_end]))
+            index = fence_end
+            continue
+
+        run = index
+        while run < len(lines) and not _is_blank(lines[run]):
+            if run > index and _scan_fence(lines, run) is not None:
+                break
+            run += 1
+
+        chunk = lines[index:run]
+        kind = (
+            BlockKind.VERBATIM
+            if any(_is_special(line) for line in chunk)
+            else BlockKind.PROSE
+        )
+        blocks.append(Block(kind, chunk))
+        index = run
+
+    return blocks
+
+
+def format_literal(
+    literal: StringLiteral,
+    indent: str,
+    kind: DocstringKind,
+    config: Config,
+) -> str:
+    """
+    Get the replacement text for a docstring literal, including quotes.
+    """
+    lines = _dedent(literal.body)
+    if not lines:
+        return literal.prefix + literal.quote + literal.quote
+
+    quote = _normalize_quote(literal)
+    blocks = parse_blocks(lines)
+
+    summary_lines: list[str]
+    rest: list[Block]
+
+    if blocks and blocks[0].kind is BlockKind.PROSE:
+        summary_lines = _summary_lines(blocks[0].lines, indent, config)
+        rest = blocks[1:]
+    else:
+        summary_lines = []
+        rest = blocks
+
+    body_lines: list[str] = []
+    for block in rest:
+        if block.kind is BlockKind.BLANK:
+            body_lines.extend("" for _ in block.lines)
+        elif block.kind is BlockKind.VERBATIM:
+            body_lines.extend(line.rstrip() for line in block.lines)
+        else:
+            body_lines.extend(
+                _reflow(
+                    block.lines,
+                    config.line_length,
+                    len(indent),
+                    config.force_reflow,
+                )
+            )
+
+    while body_lines and not body_lines[-1]:
+        body_lines.pop()
+
+    single_line = (
+        not body_lines and len(summary_lines) == 1 and not config.summary_on_own_line
+    )
+
+    if single_line:
+        return f"{literal.prefix}{quote}{summary_lines[0]}{quote}"
+
+    out: list[str] = []
+
+    if config.summary_on_own_line or not summary_lines:
+        out.append(f"{literal.prefix}{quote}")
+        out.extend(indent + line for line in summary_lines)
+    else:
+        out.append(f"{literal.prefix}{quote}{summary_lines[0]}")
+        out.extend(indent + line for line in summary_lines[1:])
+
+    out.extend(indent + line if line else "" for line in body_lines)
+
+    if config.blank_after_description and body_lines:
+        out.append("")
+
+    out.append(indent + quote)
+    return "\n".join(out)
+
+
 def _is_blank(line: str) -> bool:
     return not line.strip()
 
@@ -111,49 +224,6 @@ def _scan_fence(lines: list[str], start: int) -> int | None:
         return index + 1
 
     return len(lines)
-
-
-def parse_blocks(lines: list[str]) -> list[Block]:
-    """
-    Split docstring content lines into classified blocks.
-
-    A paragraph containing any structured line is verbatim in its entirety,
-    which keeps wrapping conservative.
-    """
-    blocks: list[Block] = []
-    index = 0
-
-    while index < len(lines):
-        if _is_blank(lines[index]):
-            run = index
-            while run < len(lines) and _is_blank(lines[run]):
-                run += 1
-            blocks.append(Block(BlockKind.BLANK, lines[index:run]))
-            index = run
-            continue
-
-        fence_end = _scan_fence(lines, index)
-        if fence_end is not None:
-            blocks.append(Block(BlockKind.VERBATIM, lines[index:fence_end]))
-            index = fence_end
-            continue
-
-        run = index
-        while run < len(lines) and not _is_blank(lines[run]):
-            if run > index and _scan_fence(lines, run) is not None:
-                break
-            run += 1
-
-        chunk = lines[index:run]
-        kind = (
-            BlockKind.VERBATIM
-            if any(_is_special(line) for line in chunk)
-            else BlockKind.PROSE
-        )
-        blocks.append(Block(kind, chunk))
-        index = run
-
-    return blocks
 
 
 def _dedent(body: str) -> list[str]:
@@ -242,73 +312,3 @@ def _summary_lines(lines: list[str], indent: str, config: Config) -> list[str]:
     if out and config.add_summary_period:
         out[-1] = _add_period(out[-1])
     return out
-
-
-def format_literal(
-    literal: StringLiteral,
-    indent: str,
-    kind: DocstringKind,
-    config: Config,
-) -> str:
-    """
-    Get the replacement text for a docstring literal, including quotes.
-    """
-    lines = _dedent(literal.body)
-    if not lines:
-        return literal.prefix + literal.quote + literal.quote
-
-    quote = _normalize_quote(literal)
-    blocks = parse_blocks(lines)
-
-    summary_lines: list[str]
-    rest: list[Block]
-
-    if blocks and blocks[0].kind is BlockKind.PROSE:
-        summary_lines = _summary_lines(blocks[0].lines, indent, config)
-        rest = blocks[1:]
-    else:
-        summary_lines = []
-        rest = blocks
-
-    body_lines: list[str] = []
-    for block in rest:
-        if block.kind is BlockKind.BLANK:
-            body_lines.extend("" for _ in block.lines)
-        elif block.kind is BlockKind.VERBATIM:
-            body_lines.extend(line.rstrip() for line in block.lines)
-        else:
-            body_lines.extend(
-                _reflow(
-                    block.lines,
-                    config.line_length,
-                    len(indent),
-                    config.force_reflow,
-                )
-            )
-
-    while body_lines and not body_lines[-1]:
-        body_lines.pop()
-
-    single_line = (
-        not body_lines and len(summary_lines) == 1 and not config.summary_on_own_line
-    )
-
-    if single_line:
-        return f"{literal.prefix}{quote}{summary_lines[0]}{quote}"
-
-    out: list[str] = []
-
-    if config.summary_on_own_line or not summary_lines:
-        out.append(f"{literal.prefix}{quote}")
-        out.extend(indent + line for line in summary_lines)
-    else:
-        out.append(f"{literal.prefix}{quote}{summary_lines[0]}")
-        out.extend(indent + line for line in summary_lines[1:])
-
-    out.extend(indent + line if line else "" for line in body_lines)
-
-    if config.blank_after_description and body_lines:
-        out.append("")
-
-    out.append(indent + quote)
-    return "\n".join(out)

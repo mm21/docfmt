@@ -29,6 +29,60 @@ _AFTER_RULES = {
 }
 
 
+def format_source(source: str, config: Config) -> str:
+    """
+    Format docstrings in a source string.
+
+    Raises `ParseError` if the source is not valid Python.
+    """
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as exc:
+        raise ParseError(str(exc)) from exc
+
+    index = LineIndex(source)
+    sites = discover(tree, source, index)
+
+    edits: list[Edit] = []
+
+    for site in sites:
+        replacement = format_literal(site.literal, site.indent, site.kind, config)
+        if replacement != source[site.start : site.end]:
+            edits.append(Edit(start=site.start, end=site.end, replacement=replacement))
+
+        edits.extend(_blank_line_edits(site, index, config))
+
+    if not edits:
+        return source
+
+    return apply_edits(source, edits)
+
+
+def format_source_checked(source: str, config: Config) -> str:
+    """
+    Format a source string and verify it against the safety gates.
+
+    Raises `InternalError` if the result changes anything beyond docstring
+    contents, or if formatting is not idempotent. Callers must leave the file
+    untouched in that case.
+    """
+    result = format_source(source, config)
+
+    if result == source:
+        return result
+
+    try:
+        if not assert_ast_equivalent(source, result):
+            raise InternalError("formatting changed the AST beyond docstrings")
+    except SyntaxError as exc:
+        raise InternalError(f"formatting produced invalid Python: {exc}") from exc
+
+    if format_source(result, config) != result:
+        raise InternalError("formatting is not idempotent")
+
+    return result
+
+
 def _blank_run_after(index: LineIndex, lineno: int) -> tuple[int, int]:
     """
     Get the (start_lineno, count) of the blank-line run following a line.
@@ -92,57 +146,3 @@ def _blank_line_edits(
             edits.append(edit)
 
     return edits
-
-
-def format_source(source: str, config: Config) -> str:
-    """
-    Format docstrings in a source string.
-
-    Raises `ParseError` if the source is not valid Python.
-    """
-    try:
-        tree = ast.parse(source)
-    except SyntaxError as exc:
-        raise ParseError(str(exc)) from exc
-
-    index = LineIndex(source)
-    sites = discover(tree, source, index)
-
-    edits: list[Edit] = []
-
-    for site in sites:
-        replacement = format_literal(site.literal, site.indent, site.kind, config)
-        if replacement != source[site.start : site.end]:
-            edits.append(Edit(start=site.start, end=site.end, replacement=replacement))
-
-        edits.extend(_blank_line_edits(site, index, config))
-
-    if not edits:
-        return source
-
-    return apply_edits(source, edits)
-
-
-def format_source_checked(source: str, config: Config) -> str:
-    """
-    Format a source string and verify it against the safety gates.
-
-    Raises `InternalError` if the result changes anything beyond docstring
-    contents, or if formatting is not idempotent. Callers must leave the file
-    untouched in that case.
-    """
-    result = format_source(source, config)
-
-    if result == source:
-        return result
-
-    try:
-        if not assert_ast_equivalent(source, result):
-            raise InternalError("formatting changed the AST beyond docstrings")
-    except SyntaxError as exc:
-        raise InternalError(f"formatting produced invalid Python: {exc}") from exc
-
-    if format_source(result, config) != result:
-        raise InternalError("formatting is not idempotent")
-
-    return result
