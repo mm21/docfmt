@@ -1,0 +1,113 @@
+[project]
+authors = [
+  {name = "mm21", email = "mm21.dev@gmail.com"}
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",  # managed by pyprojkit
+  "Programming Language :: Python :: 3.12",  # managed by pyprojkit
+  "Programming Language :: Python :: 3.13",  # managed by pyprojkit
+  "Programming Language :: Python :: 3.14",  # managed by pyprojkit
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed"
+]
+description = "Reliable docstring formatter: AST-located, surgically spliced, self-verifying"
+license = "MIT"
+license-files = ["LICENSE"]
+name = "docfmt"
+readme = "README.md"
+requires-python = ">=3.12,<3.15"  # managed by pyprojkit
+version = "0.1.0"
+
+[project.scripts]
+docfmt = "docfmt.cli:main"
+
+[project.urls]
+homepage = "https://github.com/mm21/docfmt"
+
+[dependency-groups]
+dev = [
+  "pyprojkit[all]"
+]
+
+[build-system]
+build-backend = "uv_build"
+requires = ["uv_build>=0.11.6,<0.12.0"]
+
+[tool.autoflake]  # managed by pyprojkit
+in_place = true
+recursive = true
+remove-all-unused-imports = true
+remove-unused-variables = true
+
+[tool.black]  # managed by pyprojkit
+quiet = true
+target-version = [
+  "py312",
+  "py313",
+  "py314"
+]
+
+[tool.coverage.report]  # managed by pyprojkit
+exclude_lines = [
+  "if TYPE_CHECKING:",
+  "\\.\\.\\.$"
+]
+
+[tool.coverage.run]  # managed by pyprojkit
+data_file = "__cache__/.coverage"
+
+[tool.docfmt]  # managed by pyprojkit
+black = true
+in-place = true
+make-summary-multi-line = true
+non-strict = true
+pre-summary-newline = true
+recursive = true
+
+[tool.doit]  # managed by pyprojkit
+dep_file = "__cache__/.doit.db"
+verbosity = 2
+
+[tool.isort]  # managed by pyprojkit
+profile = "black"
+quiet = true
+
+[tool.nox]  # managed by pyprojkit
+default_venv_backend = "uv"
+envdir = "__cache__/nox"
+
+[tool.pyprojkit]  # managed by pyprojkit
+managed = [
+  "tool.autoflake",
+  "tool.black",
+  "tool.coverage.report",
+  "tool.coverage.run",
+  "tool.docfmt",
+  "tool.doit",
+  "tool.isort",
+  "tool.nox",
+  "tool.pytest.ini_options",
+  "tool.tomlsort"
+]
+
+[tool.pytest.ini_options]  # managed by pyprojkit
+addopts = "--import-mode=importlib -s -v -rA"
+cache_dir = "__cache__/pytest"
+testpaths = "test"
+
+[tool.tomlsort]  # managed by pyprojkit
+sort_first = [
+  "project",
+  "dependency-groups",
+  "build-system"
+]
+sort_table_keys = true
+spaces_before_inline_comment = 2
+
+[tool.uv.sources]
+mkinit = {git = "https://github.com/mm21/mkinit.git"}
+pyprojkit = {editable = true, path = "../pyprojkit"}
