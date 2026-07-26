@@ -162,10 +162,22 @@ class B:
 
 
 def test_parse_string_literal_variants():
-    assert parse_string_literal('"""x"""').quote == '"""'
-    assert parse_string_literal("'''x'''").quote == "'''"
-    assert parse_string_literal('"x"').body == "x"
-    assert parse_string_literal('r"""x"""').is_raw is True
+    literal = parse_string_literal('"""x"""')
+    assert literal
+    assert literal.quote == '"""'
+
+    literal = parse_string_literal("'''x'''")
+    assert literal
+    assert literal.quote == "'''"
+
+    literal = parse_string_literal('"x"')
+    assert literal
+    assert literal.body == "x"
+
+    literal = parse_string_literal('r"""x"""')
+    assert literal
+    assert literal.is_raw is True
+
     assert parse_string_literal('"a" "b"') is None
     assert parse_string_literal("not a string") is None
     assert parse_string_literal('"""a""" + x') is None
