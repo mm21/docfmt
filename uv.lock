@@ -277,7 +277,7 @@ wheels = [
 
 [[package]]
 name = "docfmt"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 
 [package.dev-dependencies]
@@ -723,7 +723,7 @@ wheels = [
 
 [[package]]
 name = "pyprojkit"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "../pyprojkit" }
 dependencies = [
     { name = "doit" },
@@ -751,7 +751,7 @@ all = [
 requires-dist = [
     { name = "autoflake", marker = "extra == 'format'", specifier = ">=2.3.1,<3" },
     { name = "black", marker = "extra == 'format'", specifier = ">=25.1.0,<26" },
-    { name = "docfmt", marker = "extra == 'format'", editable = "." },
+    { name = "docfmt", marker = "extra == 'format'", specifier = ">=0.2.0,<0.3.0" },
     { name = "doit", specifier = ">=0.36.0,<0.37" },
     { name = "genbadge", extras = ["tests", "coverage"], marker = "extra == 'test'", specifier = ">=1.1.0,<2" },
     { name = "isort", marker = "extra == 'format'", specifier = ">=6.0.1,<7" },
