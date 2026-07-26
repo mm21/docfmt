@@ -104,6 +104,26 @@ class Config:
     Path name fragments to skip when recursing.
     """
 
+    in_place: bool = False
+    """
+    Write changes to files instead of printing a diff.
+    """
+
+    check: bool = False
+    """
+    Only report files which would change; mutually exclusive with `in_place`.
+    """
+
+    diff: bool = False
+    """
+    Print a unified diff even in in-place or check mode.
+    """
+
+    recursive: bool = False
+    """
+    Recurse into directories given as arguments.
+    """
+
 
 def find_config_file(start: Path) -> Path | None:
     """
@@ -143,17 +163,20 @@ def config_from_table(
     table: dict[str, Any], *, black_line_length: int | None = None
 ) -> Config:
     """
-    Build a config from a `[tool.docfmt]` table, ignoring unknown keys.
+    Build a config from a `[tool.docfmt]` table.
+
+    An unknown key is an error rather than a silent no-op: a typo, or a key
+    docfmt does not implement, would otherwise look like it had taken effect.
 
     An unset `line-length` falls back to black's when one is configured.
     """
     known = {_toml_key(f.name): f for f in fields(Config)}
+    _reject_unknown(table, known, "tool.docfmt")
+
     values: dict[str, Any] = {}
 
     for key, value in table.items():
-        info = known.get(key)
-        if info is None:
-            continue
+        info = known[key]
         if info.name == "blank_lines":
             value = _blank_line_rules(value)
         elif info.type == "tuple[str, ...]":
@@ -175,5 +198,23 @@ def _blank_line_rules(table: dict[str, Any]) -> BlankLineRules:
     Build blank-line rules from a `[tool.docfmt.blank-lines]` table.
     """
     known = {_toml_key(f.name): f.name for f in fields(BlankLineRules)}
-    values = {known[key]: value for key, value in table.items() if key in known}
-    return BlankLineRules(**values)
+    _reject_unknown(table, known, "tool.docfmt.blank-lines")
+    return BlankLineRules(**{known[key]: value for key, value in table.items()})
+
+
+def _reject_unknown(
+    table: dict[str, Any], known: dict[str, Any], table_name: str
+) -> None:
+    """
+    Raise if `table` carries any key outside `known`.
+    """
+    unknown = sorted(set(table) - set(known))
+    if not unknown:
+        return
+
+    keys = ", ".join(repr(key) for key in unknown)
+    plural = "keys" if len(unknown) > 1 else "key"
+    raise DocfmtError(
+        f"Unknown {plural} in [{table_name}]: {keys} "
+        f"(known: {', '.join(sorted(known))})"
+    )

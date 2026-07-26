@@ -109,6 +109,17 @@ summary-on-own-line = true
 | `force-reflow` | `false` | refill prose that already fits |
 | `add-summary-period` | `false` | append a period to summaries |
 | `exclude` | `[]` | path fragments to skip when recursing |
+| `in-place` | `false` | write changes instead of printing a diff |
+| `check` | `false` | only report files which would change |
+| `diff` | `false` | print a unified diff even in in-place or check mode |
+| `recursive` | `false` | recurse into directories given as arguments |
+
+An unrecognized key in `[tool.docfmt]` or `[tool.docfmt.blank-lines]` is an
+error (exit code 2), so a typo cannot silently do nothing.
+
+Command-line flags win over the config file. `--in-place` and `--check` select
+their mode outright, so either overrides a mode set in the config file; setting
+both in the config file is an error.
 
 `line-length` is left unset by default and picked up from
 `[tool.black] line-length` when black is configured, falling back to 88.

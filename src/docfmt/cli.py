@@ -44,8 +44,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if config.line_length < 0:
         parser.error(f"invalid line-length: {config.line_length}")
+    if config.in_place and config.check:
+        parser.error("in-place and check are mutually exclusive")
 
-    paths = _collect(args.files, args.recursive, config.exclude)
+    paths = _collect(args.files, config.recursive, config.exclude)
 
     changed = False
     errored = False
@@ -77,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
 
         changed = True
 
-        if args.diff or not (args.in_place or args.check):
+        if config.diff or not (config.in_place or config.check):
             diff = difflib.unified_diff(
                 source.splitlines(keepends=True),
                 result.splitlines(keepends=True),
@@ -86,18 +88,18 @@ def main(argv: list[str] | None = None) -> int:
             )
             sys.stdout.writelines(diff)
 
-        if args.in_place:
+        if config.in_place:
             try:
                 path.write_text(result, encoding="utf-8")
             except OSError as exc:
                 print(f"Error: {path}: {exc}", file=sys.stderr)
                 errored = True
-        elif args.check:
+        elif config.check:
             print(str(path), file=sys.stderr)
 
     if errored:
         return _EXIT_ERROR
-    if args.check and changed:
+    if config.check and changed:
         return _EXIT_WOULD_CHANGE
     return _EXIT_OK
 
@@ -112,20 +114,26 @@ def _build_parser() -> argparse.ArgumentParser:
         "-i",
         "--in-place",
         action="store_true",
+        default=None,
         help="write changes to files instead of printing a diff",
     )
     mode.add_argument(
         "-c",
         "--check",
         action="store_true",
+        default=None,
         help="only report files which would change",
     )
 
     parser.add_argument(
-        "-d", "--diff", action="store_true", help="print a unified diff"
+        "-d", "--diff", action="store_true", default=None, help="print a unified diff"
     )
     parser.add_argument(
-        "-r", "--recursive", action="store_true", help="recurse into directories"
+        "-r",
+        "--recursive",
+        action="store_true",
+        default=None,
+        help="recurse into directories",
     )
     parser.add_argument(
         "-e", "--exclude", nargs="*", help="path fragments to skip when recursing"
@@ -153,12 +161,19 @@ _OVERRIDABLE = (
     "blank_after_description",
     "force_reflow",
     "add_summary_period",
+    "in_place",
+    "check",
+    "diff",
+    "recursive",
 )
 
 
 def _load_config(args: argparse.Namespace) -> Config:
     """
     Build the effective config from the config file plus CLI overrides.
+
+    Passing `--in-place` or `--check` selects that mode outright, so a mode
+    configured in the config file does not survive alongside it.
     """
     path = Path(args.config) if args.config else find_config_file(Path.cwd())
 
@@ -175,6 +190,11 @@ def _load_config(args: argparse.Namespace) -> Config:
     }
     if args.exclude:
         updates["exclude"] = tuple(args.exclude)
+
+    if args.in_place:
+        updates["check"] = False
+    elif args.check:
+        updates["in_place"] = False
 
     if updates:
         config = replace(config, **updates)

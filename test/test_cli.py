@@ -143,3 +143,70 @@ def test_explicit_config_path(project, tmp_path):
     # ...whereas the project config would have expanded it
     assert main(["--in-place", str(path)]) == 0
     assert path.read_text() == FORMATTED
+
+
+def test_in_place_is_read_from_config(tmp_path, monkeypatch):
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.docfmt]\nsummary-on-own-line = true\nin-place = true\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    path = tmp_path / "a.py"
+    path.write_text(UNFORMATTED)
+
+    assert main([str(path)]) == 0
+    assert path.read_text() == FORMATTED
+
+
+def test_recursive_is_read_from_config(tmp_path, monkeypatch):
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.docfmt]\nsummary-on-own-line = true\nin-place = true\nrecursive = true\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    package = tmp_path / "pkg"
+    package.mkdir()
+    (package / "a.py").write_text(UNFORMATTED)
+
+    assert main([str(package)]) == 0
+    assert (package / "a.py").read_text() == FORMATTED
+
+
+def test_check_flag_overrides_configured_in_place(tmp_path, monkeypatch):
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.docfmt]\nsummary-on-own-line = true\nin-place = true\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    path = tmp_path / "a.py"
+    path.write_text(UNFORMATTED)
+
+    assert main(["--check", str(path)]) == 1
+    assert path.read_text() == UNFORMATTED, "check mode must not write"
+
+
+def test_configured_in_place_and_check_is_an_error(tmp_path, monkeypatch, capsys):
+    (tmp_path / "pyproject.toml").write_text(
+        "[tool.docfmt]\nin-place = true\ncheck = true\n"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    path = tmp_path / "a.py"
+    path.write_text(UNFORMATTED)
+
+    with pytest.raises(SystemExit):
+        main([str(path)])
+    assert "mutually exclusive" in capsys.readouterr().err
+    assert path.read_text() == UNFORMATTED
+
+
+def test_unknown_config_key_returns_error(tmp_path, monkeypatch, capsys):
+    (tmp_path / "pyproject.toml").write_text("[tool.docfmt]\nreflow = true\n")
+    monkeypatch.chdir(tmp_path)
+
+    path = tmp_path / "a.py"
+    path.write_text(UNFORMATTED)
+
+    assert main(["--in-place", str(path)]) == 2
+    assert "'reflow'" in capsys.readouterr().err
+    assert path.read_text() == UNFORMATTED

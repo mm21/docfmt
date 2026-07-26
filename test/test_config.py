@@ -1,6 +1,9 @@
+import pytest
+
 from docfmt import (
     DEFAULT_LINE_LENGTH,
     Config,
+    DocfmtError,
     config_from_table,
     find_config_file,
     load_table,
@@ -34,9 +37,19 @@ def test_known_good_profile_parses(tmp_path):
     assert black_line_length == 100
 
 
-def test_unknown_keys_are_ignored():
-    config = config_from_table({"line-length": 72, "style": "sphinx", "nope": 1})
-    assert config.line_length == 72
+def test_unknown_keys_are_rejected():
+    with pytest.raises(DocfmtError) as info:
+        config_from_table({"line-length": 72, "style": "sphinx", "nope": 1})
+
+    message = str(info.value)
+    assert "tool.docfmt" in message
+    assert "'nope'" in message and "'style'" in message
+
+
+def test_underscored_key_is_rejected():
+    # TOML keys are hyphenated; the field name itself must not be accepted
+    with pytest.raises(DocfmtError):
+        config_from_table({"line_length": 72})
 
 
 def test_default_line_length():
@@ -61,9 +74,11 @@ def test_blank_line_rules_default_to_preserve():
     assert config.blank_lines.before_class == "preserve"
 
 
-def test_unknown_blank_line_keys_are_ignored():
-    config = config_from_table({"blank-lines": {"after-module": 1, "nope": 2}})
-    assert config.blank_lines.after_module == 1
+def test_unknown_blank_line_keys_are_rejected():
+    with pytest.raises(DocfmtError) as info:
+        config_from_table({"blank-lines": {"after-module": 1, "nope": 2}})
+
+    assert "tool.docfmt.blank-lines" in str(info.value)
 
 
 def test_find_config_file_requires_docfmt_table(tmp_path, monkeypatch):
