@@ -30,7 +30,7 @@ homepage = "https://github.com/mm21/docfmt"
 
 [dependency-groups]
 dev = [
-  "pyprojkit[all]"
+  "pyprojkit[all]>=0.3.0,<0.4.0"
 ]
 
 [build-system]
@@ -108,4 +108,3 @@ spaces_before_inline_comment = 2
 
 [tool.uv.sources]
 mkinit = {git = "https://github.com/mm21/mkinit.git"}
-pyprojkit = {editable = true, path = "../pyprojkit"}
