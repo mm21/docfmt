@@ -1,8 +1,8 @@
 """
 Golden tests for the blank-line rule table.
 
-Every rule defaults to `preserve`, so the default profile must leave all gaps
-exactly as written.
+Every rule defaults to `preserve`, so the default profile must leave all gaps exactly as
+written.
 """
 
 from dataclasses import replace

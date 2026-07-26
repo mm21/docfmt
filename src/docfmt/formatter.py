@@ -1,8 +1,8 @@
 """
 Formatting orchestration.
 
-Discovers docstring sites, builds a set of non-overlapping edits, applies them in
-one pass, and verifies the result against the safety gates before returning it.
+Discovers docstring sites, builds a set of non-overlapping edits, applies them in one
+pass, and verifies the result against the safety gates before returning it.
 """
 
 from __future__ import annotations
@@ -62,9 +62,8 @@ def format_source_checked(source: str, config: Config) -> str:
     """
     Format a source string and verify it against the safety gates.
 
-    Raises `InternalError` if the result changes anything beyond docstring
-    contents, or if formatting is not idempotent. Callers must leave the file
-    untouched in that case.
+    Raises `InternalError` if the result changes anything beyond docstring contents, or
+    if formatting is not idempotent. Callers must leave the file untouched in that case.
     """
     result = format_source(source, config)
 
@@ -126,8 +125,8 @@ def _blank_line_edits(
     """
     Build blank-line edits for a site.
 
-    All rules default to preserving existing blank lines, so this returns nothing
-    unless a rule is explicitly configured.
+    All rules default to preserving existing blank lines, so this returns nothing unless
+    a rule is explicitly configured.
     """
     edits: list[Edit] = []
 

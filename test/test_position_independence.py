@@ -1,6 +1,6 @@
 """
-Regression tests for the exact docformatter failure mode: formatting that
-depends on how much unrelated code precedes the docstring being formatted.
+Regression tests for the exact docformatter failure mode: formatting that depends on how
+much unrelated code precedes the docstring being formatted.
 """
 
 import pytest

@@ -27,8 +27,8 @@ class ParseError(DocfmtError):
 
 class InternalError(DocfmtError):
     """
-    Raised when a safety gate fails: the formatted result either changed the AST
-    beyond docstring constants, or was not idempotent.
+    Raised when a safety gate fails: the formatted result either changed the AST beyond
+    docstring constants, or was not idempotent.
 
     This always indicates a bug in docfmt. The file is left untouched.
     """

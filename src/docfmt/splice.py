@@ -1,10 +1,10 @@
 """
 Offset-based edit splicing and source geometry.
 
-The central invariant of docfmt: the output is the input with a set of
-non-overlapping character-range replacements applied. Everything not covered by
-an edit is preserved byte-for-byte. There is no tokenize/untokenize round trip
-and no whole-file regeneration, so no edit can perturb an unrelated region.
+The central invariant of docfmt: the output is the input with a set of non-overlapping
+character-range replacements applied. Everything not covered by an edit is preserved
+byte-for-byte. There is no tokenize/untokenize round trip and no whole-file
+regeneration, so no edit can perturb an unrelated region.
 """
 
 from __future__ import annotations
@@ -40,8 +40,8 @@ def apply_edits(source: str, edits: Sequence[Edit]) -> str:
     """
     Apply edits to the source, returning the new text.
 
-    Edits must not overlap; they are applied from the end backwards so that
-    earlier offsets remain valid throughout.
+    Edits must not overlap; they are applied from the end backwards so that earlier
+    offsets remain valid throughout.
     """
     ordered = sorted(edits, key=lambda edit: (edit.start, edit.end))
 
@@ -61,8 +61,8 @@ class LineIndex:
     """
     Maps `ast` positions to character offsets in the source.
 
-    `ast` reports `col_offset` as a UTF-8 byte offset into the line, so columns
-    are converted through the encoded line rather than used directly.
+    `ast` reports `col_offset` as a UTF-8 byte offset into the line, so columns are
+    converted through the encoded line rather than used directly.
     """
 
     def __init__(self, source: str):
@@ -97,8 +97,8 @@ class LineIndex:
 
     def line_end(self, lineno: int) -> int:
         """
-        Get the character offset just past the end of a 1-indexed line, including
-        its newline.
+        Get the character offset just past the end of a 1-indexed line, including its
+        newline.
         """
         if lineno >= len(self._lines):
             return self._starts[-1]

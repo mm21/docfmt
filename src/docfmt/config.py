@@ -1,9 +1,9 @@
 """
 Configuration model and discovery.
 
-Defaults are conservative: docfmt normalizes docstring *layout* but never mutates
-author text, and preserves every blank line around docstrings unless a
-blank-line rule is explicitly configured.
+Defaults are conservative: docfmt normalizes docstring *layout* but never mutates author
+text, and preserves every blank line around docstrings unless a blank-line rule is
+explicitly configured.
 """
 
 from __future__ import annotations
@@ -46,8 +46,8 @@ class BlankLineRules:
     """
     Blank lines to enforce around docstrings.
 
-    Each rule is either a count or `PRESERVE`, which leaves whatever the author
-    wrote alone.
+    Each rule is either a count or `PRESERVE`, which leaves whatever the author wrote
+    alone.
     """
 
     before_class: BlankLines = PRESERVE
@@ -69,8 +69,8 @@ class Config:
     """
     Wrap docstrings at this length; 0 disables wrapping.
 
-    When left unset in the config file, black's configured line length is used
-    if there is one.
+    When left unset in the config file, black's configured line length is used if there
+    is one.
     """
 
     summary_on_own_line: bool = False
@@ -90,8 +90,8 @@ class Config:
 
     add_summary_period: bool = False
     """
-    Append a period to summaries which lack terminal punctuation; opt-in because
-    it mutates author text.
+    Append a period to summaries which lack terminal punctuation; opt-in because it
+    mutates author text.
     """
 
     blank_lines: BlankLineRules = field(default_factory=BlankLineRules)
@@ -165,8 +165,8 @@ def config_from_table(
     """
     Build a config from a `[tool.docfmt]` table.
 
-    An unknown key is an error rather than a silent no-op: a typo, or a key
-    docfmt does not implement, would otherwise look like it had taken effect.
+    An unknown key is an error rather than a silent no-op: a typo, or a key docfmt does
+    not implement, would otherwise look like it had taken effect.
 
     An unset `line-length` falls back to black's when one is configured.
     """

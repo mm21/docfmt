@@ -1,8 +1,8 @@
 """
 Docstring discovery via AST structure.
 
-Docstrings are located purely from the parsed tree — never from token heuristics
-or line-content matching. Four kinds are recognized:
+Docstrings are located purely from the parsed tree — never from token heuristics or
+line-content matching. Four kinds are recognized:
 
 - module / class / function: the first statement of a body being `Expr(Constant(str))`
 - attribute: a bare string `Expr` statement immediately following an `AnnAssign` or
@@ -115,8 +115,8 @@ class DocstringSite:
 
     is_own: bool
     """
-    Whether this is the owner's own docstring (first statement of a body) as
-    opposed to an attribute docstring.
+    Whether this is the owner's own docstring (first statement of a body) as opposed to
+    an attribute docstring.
     """
 
 
@@ -124,9 +124,9 @@ def parse_string_literal(segment: str) -> StringLiteral | None:
     """
     Parse a source segment as exactly one string literal.
 
-    Returns `None` if the segment is anything else — most importantly implicit
-    string concatenation (`"a" "b"`), which is left untouched rather than
-    rewritten into a single literal.
+    Returns `None` if the segment is anything else — most importantly implicit string
+    concatenation (`"a" "b"`), which is left untouched rather than rewritten into a
+    single literal.
     """
     index = 0
     while index < len(segment) and segment[index] in _PREFIX_CHARS:
@@ -164,8 +164,8 @@ def iter_docstring_nodes(tree: ast.AST) -> Iterator[ast.Constant]:
     """
     Yield every `Constant` node which docfmt treats as a docstring.
 
-    Shared by discovery and the AST-equivalence gate so that both agree exactly
-    on what counts as a docstring.
+    Shared by discovery and the AST-equivalence gate so that both agree exactly on what
+    counts as a docstring.
     """
     for node in ast.walk(tree):
         if not isinstance(node, _BODY_OWNERS):
@@ -192,8 +192,8 @@ def discover(tree: ast.AST, source: str, index: LineIndex) -> list[DocstringSite
     """
     Locate every docstring site in the tree, in source order.
 
-    Sites whose literal cannot be parsed as a single string literal are skipped,
-    leaving those docstrings untouched.
+    Sites whose literal cannot be parsed as a single string literal are skipped, leaving
+    those docstrings untouched.
     """
     sites: list[DocstringSite] = []
 

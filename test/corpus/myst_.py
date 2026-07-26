@@ -1,8 +1,8 @@
 """
 MyST corpus file.
 
-Exercises directives, nested fences, inline role attributes, and plain code
-fences in module, class, method, and attribute docstrings.
+Exercises directives, nested fences, inline role attributes, and plain code fences in
+module, class, method, and attribute docstrings.
 
 ```python
 from myst_ import Content

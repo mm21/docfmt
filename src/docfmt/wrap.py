@@ -34,9 +34,9 @@ def tokenize_atoms(text: str) -> list[str]:
     """
     Split text into unbreakable atoms.
 
-    Adjacent tokens with no whitespace between them are merged, so a construct
-    like ``\\`False\\`{l=python}`` — or a code span containing spaces — survives as a
-    single atom.
+    Adjacent tokens with no whitespace between them are merged, so a construct like
+    ``\\`False\\`{l=python}`` — or a code span containing spaces — survives as a single
+    atom.
     """
     atoms: list[str] = []
     previous_end: int | None = None
@@ -55,9 +55,9 @@ def wrap_paragraph(text: str, width: int, indent_len: int) -> list[str]:
     """
     Greedily wrap a paragraph, returning lines *without* indentation.
 
-    Lines are sized so that `indent_len` plus the line length does not exceed
-    `width`. A width of 0 disables wrapping. An atom longer than the available
-    width is emitted on its own line rather than being split.
+    Lines are sized so that `indent_len` plus the line length does not exceed `width`. A
+    width of 0 disables wrapping. An atom longer than the available width is emitted on
+    its own line rather than being split.
     """
     atoms = tokenize_atoms(text)
     if not atoms:

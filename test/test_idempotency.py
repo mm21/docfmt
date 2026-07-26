@@ -1,6 +1,6 @@
 """
-Property tests over the corpus: formatting must be idempotent, must never change
-the AST beyond docstring contents, and must be independent of file position.
+Property tests over the corpus: formatting must be idempotent, must never change the AST
+beyond docstring contents, and must be independent of file position.
 """
 
 from pathlib import Path

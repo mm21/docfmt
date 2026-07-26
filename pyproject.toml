@@ -61,6 +61,7 @@ exclude_lines = [
 data_file = "__cache__/.coverage"
 
 [tool.docfmt]  # managed by pyprojkit
+force-reflow = true
 in-place = true
 recursive = true
 summary-on-own-line = true

@@ -1,14 +1,13 @@
 """
 Docstring interior reformatting.
 
-Operates purely on the text between the quotes. Structured content is copied
-verbatim; only plain prose paragraphs are rewrapped. By default docfmt never
-mutates author text — adding a trailing period and capitalizing the first word
-are opt-in.
+Operates purely on the text between the quotes. Structured content is copied verbatim;
+only plain prose paragraphs are rewrapped. By default docfmt never mutates author text —
+adding a trailing period and capitalizing the first word are opt-in.
 
-The fence scanner is MyST-aware: directives nest by *widening* the fence, so
-fence length is significant and a narrower fence inside a wider one is content,
-not a terminator.
+The fence scanner is MyST-aware: directives nest by *widening* the fence, so fence
+length is significant and a narrower fence inside a wider one is content, not a
+terminator.
 """
 
 from __future__ import annotations
@@ -73,8 +72,8 @@ def parse_blocks(lines: list[str]) -> list[Block]:
     """
     Split docstring content lines into classified blocks.
 
-    A paragraph containing any structured line is verbatim in its entirety,
-    which keeps wrapping conservative.
+    A paragraph containing any structured line is verbatim in its entirety, which keeps
+    wrapping conservative.
     """
     blocks: list[Block] = []
     index = 0
@@ -200,9 +199,9 @@ def _scan_fence(lines: list[str], start: int) -> int | None:
     """
     If `lines[start]` opens a fence, get the index just past its closing fence.
 
-    A block closes only on a fence of the same character with at least as many
-    markers and no info string; anything narrower, or carrying an info string, is
-    content. An unterminated fence consumes the remainder.
+    A block closes only on a fence of the same character with at least as many markers
+    and no info string; anything narrower, or carrying an info string, is content. An
+    unterminated fence consumes the remainder.
     """
     match = _FENCE_RE.match(lines[start].lstrip())
     if match is None:
@@ -230,8 +229,8 @@ def _dedent(body: str) -> list[str]:
     """
     Split a literal body into content lines with common indentation removed.
 
-    The first line is handled separately since it sits on the opening-quote line
-    and therefore carries no indentation.
+    The first line is handled separately since it sits on the opening-quote line and
+    therefore carries no indentation.
     """
     raw = body.split("\n")
     first = raw[0].strip()
@@ -264,9 +263,9 @@ def _reflow(lines: list[str], width: int, indent_len: int, force: bool) -> list[
     """
     Rewrap a prose block, but only when it does not already fit.
 
-    Preserving author line breaks in paragraphs that are already within the wrap
-    width keeps docfmt a drop-in: it does not refill prose that nothing is wrong
-    with. `force_reflow` opts into unconditional reflow.
+    Preserving author line breaks in paragraphs that are already within the wrap width
+    keeps docfmt a drop-in: it does not refill prose that nothing is wrong with.
+    `force_reflow` opts into unconditional reflow.
     """
     if not force and _fits(lines, width, indent_len):
         return [line.rstrip() for line in lines]

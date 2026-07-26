@@ -1,9 +1,9 @@
 """
 Reliable docstring formatter.
 
-Docstrings are located via `ast` structure and rewritten by surgical text
-splices, so everything outside a docstring is preserved byte-for-byte. Results
-are verified for AST equivalence and idempotency before being written.
+Docstrings are located via `ast` structure and rewritten by surgical text splices, so
+everything outside a docstring is preserved byte-for-byte. Results are verified for AST
+equivalence and idempotency before being written.
 """
 
 __submodules__ = [

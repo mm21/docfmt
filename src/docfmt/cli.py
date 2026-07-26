@@ -172,8 +172,8 @@ def _load_config(args: argparse.Namespace) -> Config:
     """
     Build the effective config from the config file plus CLI overrides.
 
-    Passing `--in-place` or `--check` selects that mode outright, so a mode
-    configured in the config file does not survive alongside it.
+    Passing `--in-place` or `--check` selects that mode outright, so a mode configured
+    in the config file does not survive alongside it.
     """
     path = Path(args.config) if args.config else find_config_file(Path.cwd())
 
