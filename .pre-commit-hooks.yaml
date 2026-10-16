@@ -1,0 +1,15 @@
+- id: docfmt
+  name: docfmt
+  description: Format Python docstrings in place
+  entry: docfmt
+  args: [--in-place]
+  language: python
+  types: [python]
+
+- id: docfmt-check
+  name: docfmt (check)
+  description: Fail if any Python docstrings would be reformatted
+  entry: docfmt
+  args: [--check, --diff]
+  language: python
+  types: [python]
