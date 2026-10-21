@@ -286,17 +286,13 @@ source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [
-    { name = "mkinit" },
     { name = "pyprojkit", extra = ["all"] },
 ]
 
 [package.metadata]
 
 [package.metadata.requires-dev]
-dev = [
-    { name = "mkinit", git = "https://github.com/mm21/mkinit.git" },
-    { name = "pyprojkit", extras = ["all"], specifier = ">=0.4.2,<0.5.0" },
-]
+dev = [{ name = "pyprojkit", extras = ["all"], specifier = ">=0.4.3,<0.5.0" }]
 
 [[package]]
 name = "doit"
@@ -536,9 +532,13 @@ wheels = [
 [[package]]
 name = "mkinit"
 version = "1.3.0"
-source = { git = "https://github.com/mm21/mkinit.git#aa41d7945fd59ade6bcf3e6ab3e0e27b13527a15" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "ubelt" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/34/3e/160ef650c13c5cbc444143ca6869d7e06bc608eedb693f34dd5cc238ea98/mkinit-1.3.0.tar.gz", hash = "sha256:e6c7cc96ba20ddf80dc646744ef576aa1377541cc9fee0c131bdabff05f9ef0a", size = 70753, upload-time = "2026-10-21T21:14:02.283Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/05/60/54e5cfe33db8706668892a2bb75d072037bde6389fac250d96c16fe831fc/mkinit-1.3.0-py3-none-any.whl", hash = "sha256:c71480d10d5deb07ca917eac2d970c7e64b39ce47ce7271b7952a0ae8eed504b", size = 63995, upload-time = "2026-10-21T21:14:00.769Z" },
 ]
 
 [[package]]
@@ -752,7 +752,7 @@ wheels = [
 
 [[package]]
 name = "pyprojkit"
-version = "0.4.2"
+version = "0.4.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "doit" },
@@ -761,9 +761,9 @@ dependencies = [
     { name = "toml-sort" },
     { name = "tomlkit" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/00/ca/dd0347c1858e5e0528b95f5f2cdca6ac1e9043506e9a0292132ed3d46d89/pyprojkit-0.4.2.tar.gz", hash = "sha256:d33ae2bbeee3cd87187384d6ea94cb213658aecf4bc00400b48f28ea0c96c7bb", size = 28509, upload-time = "2026-10-21T05:06:09.765Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/3d/82/0e149f84ac213a1dcb55c9271f9cf08418d15a232af9e7cbc08edf07446c/pyprojkit-0.4.3.tar.gz", hash = "sha256:b84938cebf6f237b27733ce2912275ddfbf39c576a0052b6d6fccb9cf247cbbe", size = 28490, upload-time = "2026-10-21T23:42:37.291Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/71/6a/3b971176a585691f879ff1d20b1376d15d7b20b15043b48bb6dba90e1a4d/pyprojkit-0.4.2-py3-none-any.whl", hash = "sha256:41ebf27665802023328618b561705c9e5664ece26d70c75b272a50b40316e58e", size = 35354, upload-time = "2026-10-21T05:06:08.359Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/06/8a228e2c97a95aadb01dd68aa2cb0b578397909a8a3a909e09e489a9449d/pyprojkit-0.4.3-py3-none-any.whl", hash = "sha256:fc2e94d43a25a0c5c6f78158022ea3705ced6fdcdce170cc8c615db0664461b5", size = 35359, upload-time = "2026-10-21T23:42:36.138Z" },
 ]
 
 [package.optional-dependencies]

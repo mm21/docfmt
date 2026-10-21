@@ -32,8 +32,7 @@ homepage = "https://github.com/mm21/docfmt"
 
 [dependency-groups]
 dev = [
-  "mkinit",
-  "pyprojkit[all]>=0.4.2,<0.5.0"
+  "pyprojkit[all]>=0.4.3,<0.5.0"
 ]
 
 [build-system]
@@ -98,6 +97,3 @@ sort_first = [
 ]  # pyprojkit-managed
 sort_table_keys = true  # pyprojkit-managed
 spaces_before_inline_comment = 2  # pyprojkit-managed
-
-[tool.uv.sources]
-mkinit = {git = "https://github.com/mm21/mkinit.git"}
