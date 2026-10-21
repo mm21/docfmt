@@ -26,7 +26,7 @@ __all__ = [
     "config_from_table",
 ]
 
-PRESERVE = "preserve"
+PRESERVE: Literal["preserve"] = "preserve"
 """
 Blank-line rule value meaning "leave existing blank lines alone".
 """

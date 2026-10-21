@@ -4,6 +4,7 @@ beyond docstring contents, and must be independent of file position.
 """
 
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -15,7 +16,7 @@ TESTS = sorted(Path(__file__).parent.glob("test_*.py"))
 
 ALL_FILES = CORPUS + SOURCES + TESTS
 
-PROFILES = {
+PROFILES: dict[str, dict[str, Any]] = {
     "known-good": dict(summary_on_own_line=True),
     "defaults": {},
     "aggressive": dict(
