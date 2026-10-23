@@ -22,7 +22,7 @@ license-files = ["LICENSE"]
 name = "docfmt"
 readme = "README.md"
 requires-python = ">=3.12,<4.0"  # pyprojkit-managed
-version = "0.3.0"
+version = "0.3.1"
 
 [project.scripts]
 docfmt = "docfmt.cli:main"
